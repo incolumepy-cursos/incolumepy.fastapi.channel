@@ -1,9 +1,18 @@
+FROM python:3.10.5-slim-bullseye as stage1
+
+WORKDIR /app
+
+COPY ./* /app/
+RUN pip install poetry && poetry export --without-hashes -o requirements.txt
+
+
 FROM python:3.10.5-slim-bullseye
 
 WORKDIR /app
 
-COPY .requirements.txt /app/
-RUN pip install --upgrade pip && pip install --no-cache-dir --upgrade -r requirements.txt
+COPY --from=stage1 /app/requirements.txt /app/requirements.txt
+
+RUN pip install --no-cache-dir -U pip && pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY . /app/
 

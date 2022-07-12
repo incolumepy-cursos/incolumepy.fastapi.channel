@@ -2,7 +2,13 @@ import imp
 import json
 from dataclasses import dataclass, field
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Response, status
+import logging
+from inspect import stack
+
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 app = FastAPI()
 
@@ -25,17 +31,18 @@ with open('channels.json', encoding='utf8') as file:
 
 
 @app.get('/')
-def read_root() -> Response:
+def root() -> Response:
     return Response('The server is running.')
 
 
 @app.get('/channels/{channel_id}', response_model=Channel)
-def read_item(channel_id: str) -> Channel:
+def channel_read(channel_id: str) -> Channel:
     if channel_id not in channels:
+        logging.error(f'{channel_id=}{status.HTTP_404_NOT_FOUND=}')
         raise HTTPException(status_code=404, detail='Channel not found')
     return channels[channel_id]
 
 
 @app.get('/channels')
-def read_all():
+def channel_all():
     return channels
